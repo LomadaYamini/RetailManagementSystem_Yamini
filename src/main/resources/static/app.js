@@ -1,5 +1,5 @@
 // ==========================
-// ✅ BASE URL (AUTO SWITCH)
+// ✅ BASE URL
 // ==========================
 const BASE =
   window.location.hostname === 'localhost'
@@ -9,7 +9,31 @@ const BASE =
 console.log("JS LOADED");
 
 // ==========================
-// ✅ GET ALL ELEMENTS
+// ✅ NAVIGATION (FIXED)
+// ==========================
+const sections = ['customers', 'orders', 'products'];
+
+function switchSection(name) {
+  sections.forEach(s => {
+    document.getElementById(`section-${s}`).classList.toggle('hidden', s !== name);
+    document.getElementById(`nav-${s}`).classList.toggle('active', s === name);
+  });
+
+  document.getElementById('pageTitle').textContent =
+    name === 'customers' ? 'Customer Management' :
+    name === 'orders' ? 'Order Management' :
+    'Product Management';
+}
+
+document.querySelectorAll('.nav-item').forEach(link => {
+  link.onclick = (e) => {
+    e.preventDefault();
+    switchSection(link.dataset.section);
+  };
+});
+
+// ==========================
+// ✅ ELEMENTS
 // ==========================
 
 // Buttons
@@ -48,12 +72,12 @@ const orderByCustomerTableWrap = document.getElementById("orderByCustomerTableWr
 const orderByRangeTableBody = document.getElementById("orderByRangeTableBody");
 const orderByRangeTableWrap = document.getElementById("orderByRangeTableWrap");
 
-// Server status
+// Status
 const statusDot = document.getElementById("statusDot");
 const statusText = document.getElementById("statusText");
 
 // ==========================
-// ✅ SERVER CHECK (FIXED)
+// ✅ SERVER STATUS
 // ==========================
 async function checkServer() {
   try {
@@ -75,7 +99,7 @@ checkServer();
 setInterval(checkServer, 30000);
 
 // ==========================
-// ✅ GET CUSTOMERS
+// ✅ CUSTOMERS
 // ==========================
 btnGetCustomers.onclick = async () => {
   const type = searchCustomerType.value;
@@ -85,24 +109,19 @@ btnGetCustomers.onclick = async () => {
     return;
   }
 
-  try {
-    const res = await fetch(`${BASE}/customer/controller/getCustomersByType/${type}`);
-    const data = await res.json();
+  const res = await fetch(`${BASE}/customer/controller/getCustomersByType/${type}`);
+  const data = await res.json();
 
-    customerTableBody.innerHTML = data.map(c => `
-      <tr>
-        <td>${c.customerId}</td>
-        <td>${c.customerName}</td>
-        <td>${c.customerEmail}</td>
-        <td>${c.customerType}</td>
-      </tr>
-    `).join("");
+  customerTableBody.innerHTML = data.map(c => `
+    <tr>
+      <td>${c.customerId}</td>
+      <td>${c.customerName}</td>
+      <td>${c.customerEmail}</td>
+      <td>${c.customerType}</td>
+    </tr>
+  `).join("");
 
-    customerTableWrap.style.display = "block";
-
-  } catch {
-    alert("Error fetching customers");
-  }
+  customerTableWrap.style.display = "block";
 };
 
 // ==========================
@@ -116,56 +135,46 @@ btnUpdateCustomer.onclick = async () => {
     customerType: updCustType.value
   };
 
-  try {
-    const res = await fetch(`${BASE}/customer/controller/updateCustomer`, {
-      method: 'PUT',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(payload)
-    });
+  const res = await fetch(`${BASE}/customer/controller/updateCustomer`, {
+    method: "PUT",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(payload)
+  });
 
-    alert(await res.text());
-
-  } catch {
-    alert("Update failed");
-  }
+  alert(await res.text());
 };
 
 // ==========================
-// ✅ GET ORDERS BY CUSTOMER ID
+// ✅ ORDERS BY CUSTOMER ID
 // ==========================
 btnGetOrdersByCustomer.onclick = async () => {
   const id = orderCustomerId.value;
 
   if (!id) {
-    alert("Enter Customer ID");
+    alert("Enter customer ID");
     return;
   }
 
-  try {
-    const res = await fetch(`${BASE}/order/controller/getOrderDetailsByCustomerId/${id}`);
-    const data = await res.json();
+  const res = await fetch(`${BASE}/order/controller/getOrderDetailsByCustomerId/${id}`);
+  const data = await res.json();
 
-    orderByCustomerTableBody.innerHTML = data.map(o => `
-      <tr>
-        <td>${o.orderId}</td>
-        <td>${o.customerId}</td>
-        <td>${o.customerEmail}</td>
-        <td>${o.productName}</td>
-        <td>${o.quantity}</td>
-        <td>${o.orderDate}</td>
-        <td>${o.billingAmount}</td>
-      </tr>
-    `).join("");
+  orderByCustomerTableBody.innerHTML = data.map(o => `
+    <tr>
+      <td>${o.orderId}</td>
+      <td>${o.customerId}</td>
+      <td>${o.customerEmail}</td>
+      <td>${o.productName}</td>
+      <td>${o.quantity}</td>
+      <td>${o.orderDate}</td>
+      <td>${o.billingAmount}</td>
+    </tr>
+  `).join("");
 
-    orderByCustomerTableWrap.style.display = "block";
-
-  } catch {
-    alert("Error fetching orders");
-  }
+  orderByCustomerTableWrap.style.display = "block";
 };
 
 // ==========================
-// ✅ GET ORDERS BY RANGE (FINAL FIX)
+// ✅ ORDERS BY RANGE (FIXED)
 // ==========================
 btnGetOrdersByRange.onclick = async () => {
   const type = rangeCustomerType.value;
@@ -177,37 +186,35 @@ btnGetOrdersByRange.onclick = async () => {
     return;
   }
 
-  try {
-    const url = `${BASE}/order/controller/getOrderDetailsByCustomerTypeAndBillInRange/${type}/${min}/${max}`;
-    console.log("Calling:", url);
+  const url = `${BASE}/order/controller/getOrderDetailsByCustomerTypeAndBillInRange/${type}/${min}/${max}`;
+  console.log("Calling:", url);
 
-    const res = await fetch(url);
+  const res = await fetch(url);
 
-    if (!res.ok) throw new Error(await res.text());
-
-    const data = await res.json();
-
-    orderByRangeTableBody.innerHTML = data.map(o => `
-      <tr>
-        <td>${o.orderId}</td>
-        <td>${o.customerId}</td>
-        <td>${o.customerEmail}</td>
-        <td>${o.productName}</td>
-        <td>${o.quantity}</td>
-        <td>${o.orderDate}</td>
-        <td>${o.billingAmount}</td>
-      </tr>
-    `).join("");
-
-    orderByRangeTableWrap.style.display = "block";
-
-  } catch (err) {
-    alert("Range fetch failed: " + err.message);
+  if (!res.ok) {
+    alert("Range fetch failed");
+    return;
   }
+
+  const data = await res.json();
+
+  orderByRangeTableBody.innerHTML = data.map(o => `
+    <tr>
+      <td>${o.orderId}</td>
+      <td>${o.customerId}</td>
+      <td>${o.customerEmail}</td>
+      <td>${o.productName}</td>
+      <td>${o.quantity}</td>
+      <td>${o.orderDate}</td>
+      <td>${o.billingAmount}</td>
+    </tr>
+  `).join("");
+
+  orderByRangeTableWrap.style.display = "block";
 };
 
 // ==========================
-// ✅ UPDATE PRODUCT STOCK
+// ✅ UPDATE PRODUCT
 // ==========================
 btnUpdateStock.onclick = async () => {
   const payload = {
@@ -217,16 +224,11 @@ btnUpdateStock.onclick = async () => {
     stock: prodStock.value
   };
 
-  try {
-    const res = await fetch(`${BASE}/product/controller/updateProductStock`, {
-      method: 'PUT',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(payload)
-    });
+  const res = await fetch(`${BASE}/product/controller/updateProductStock`, {
+    method: "PUT",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(payload)
+  });
 
-    alert(await res.text());
-
-  } catch {
-    alert("Stock update failed");
-  }
+  alert(await res.text());
 };
