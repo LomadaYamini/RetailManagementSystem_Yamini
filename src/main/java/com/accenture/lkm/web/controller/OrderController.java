@@ -11,7 +11,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.accenture.lkm.bean.OrderBean;
 import com.accenture.lkm.service.OrderService;
-
+@CrossOrigin(origins = "*")
 @RestController
 @RequestMapping("/order/controller")
 public class OrderController {
