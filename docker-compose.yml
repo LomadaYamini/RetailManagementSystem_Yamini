@@ -27,13 +27,5 @@ services:
       mysql-db:
         condition: service_healthy
 
-  frontend:
-    build: ./frontend
-    container_name: rms-frontend
-    ports:
-      - "80:80"
-    depends_on:
-      - backend
-
 volumes:
   mysql-data:

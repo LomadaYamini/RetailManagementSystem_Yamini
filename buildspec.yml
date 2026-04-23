@@ -16,7 +16,6 @@ phases:
       - aws --version
       - aws ecr get-login-password --region $AWS_DEFAULT_REGION | docker login --username AWS --password-stdin $AWS_ACCOUNT_ID.dkr.ecr.$AWS_DEFAULT_REGION.amazonaws.com
       - REPOSITORY_URI_BACKEND=$AWS_ACCOUNT_ID.dkr.ecr.$AWS_DEFAULT_REGION.amazonaws.com/rms-backend
-      - REPOSITORY_URI_FRONTEND=$AWS_ACCOUNT_ID.dkr.ecr.$AWS_DEFAULT_REGION.amazonaws.com/rms-frontend
       - COMMIT_HASH=$(echo $CODEBUILD_RESOLVED_SOURCE_VERSION | cut -c 1-7)
       - IMAGE_TAG=${COMMIT_HASH:=latest}
   build:
@@ -25,20 +24,15 @@ phases:
       - echo Building the Docker images...
       - docker build -t $REPOSITORY_URI_BACKEND:latest .
       - docker build -t $REPOSITORY_URI_BACKEND:$IMAGE_TAG .
-      - docker build -t $REPOSITORY_URI_FRONTEND:latest ./frontend
-      - docker build -t $REPOSITORY_URI_FRONTEND:$IMAGE_TAG ./frontend
   post_build:
     commands:
       - echo Build completed on `date`
       - echo Pushing the Docker images...
       - docker push $REPOSITORY_URI_BACKEND:latest
       - docker push $REPOSITORY_URI_BACKEND:$IMAGE_TAG
-      - docker push $REPOSITORY_URI_FRONTEND:latest
-      - docker push $REPOSITORY_URI_FRONTEND:$IMAGE_TAG
       - echo Updating kubeconfig...
       - aws eks update-kubeconfig --name $EKS_CLUSTER_NAME --region $AWS_DEFAULT_REGION
       - echo Deploying to Amazon EKS...
       - sed -i "s|rms-backend:latest|$REPOSITORY_URI_BACKEND:$IMAGE_TAG|g" k8s/backend-deployment.yaml
-      - sed -i "s|rms-frontend:latest|$REPOSITORY_URI_FRONTEND:$IMAGE_TAG|g" k8s/frontend-deployment.yaml
       - kubectl apply -f k8s/
       - echo Deployment complete!

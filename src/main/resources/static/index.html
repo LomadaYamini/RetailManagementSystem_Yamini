@@ -1,0 +1,334 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description"
+    content="Retail Management System – manage customers, orders, and product stock in one sleek dashboard." />
+  <title>Retail Management System</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap"
+    rel="stylesheet" />
+  <link rel="stylesheet" href="style.css" />
+</head>
+
+<body>
+
+  <!-- Sidebar -->
+  <aside class="sidebar" id="sidebar">
+    <div class="sidebar-logo">
+      <div class="logo-icon">🛒</div>
+      <span class="logo-text">RetailMS</span>
+    </div>
+    <nav class="sidebar-nav">
+      <a href="#" class="nav-item active" data-section="customers" id="nav-customers">
+        <span class="nav-icon">👥</span>
+        <span class="nav-label">Customers</span>
+      </a>
+      <a href="#" class="nav-item" data-section="orders" id="nav-orders">
+        <span class="nav-icon">📦</span>
+        <span class="nav-label">Orders</span>
+      </a>
+      <a href="#" class="nav-item" data-section="products" id="nav-products">
+        <span class="nav-icon">🏷️</span>
+        <span class="nav-label">Products</span>
+      </a>
+    </nav>
+    <div class="sidebar-footer">
+      <div class="server-status">
+        <span class="status-dot" id="statusDot"></span>
+        <span class="status-text" id="statusText">Connecting…</span>
+      </div>
+    </div>
+  </aside>
+
+  <!-- Main Content -->
+  <main class="main-content">
+
+    <!-- Top Bar -->
+    <header class="topbar">
+      <div class="topbar-left">
+        <h1 class="page-title" id="pageTitle">Customer Management</h1>
+        <p class="page-sub" id="pageSub">Search and manage customer records</p>
+      </div>
+      <div class="topbar-right">
+        <div class="avatar">YA</div>
+      </div>
+    </header>
+
+    <!-- Toast Notification -->
+    <div class="toast" id="toast"></div>
+
+    <!-- ===================== CUSTOMERS SECTION ===================== -->
+    <section class="section" id="section-customers">
+
+      <!-- Card: Get Customers by Type -->
+      <div class="card">
+        <div class="card-header">
+          <div class="card-icon get-icon">GET</div>
+          <div>
+            <h2 class="card-title">Get Customers by Type</h2>
+            <code class="endpoint-badge">/customer/controller/getCustomersByType/{customerType}</code>
+          </div>
+        </div>
+        <div class="card-body">
+          <div class="form-row">
+            <div class="form-group">
+              <label for="searchCustomerType">Customer Type</label>
+              <select id="searchCustomerType">
+                <option value="">— Select Type —</option>
+                <option value="Platinum">Platinum</option>
+                <option value="Gold">Gold</option>
+                <option value="Silver">Silver</option>
+              </select>
+            </div>
+            <div class="form-group btn-group-end">
+              <button class="btn btn-primary" id="btnGetCustomers">
+                <span>Search</span>
+                <span class="btn-icon">🔍</span>
+              </button>
+            </div>
+          </div>
+          <div class="table-wrap" id="customerTableWrap" style="display:none;">
+            <table id="customerTable">
+              <thead>
+                <tr>
+                  <th>ID</th>
+                  <th>Name</th>
+                  <th>Email</th>
+                  <th>Type</th>
+                </tr>
+              </thead>
+              <tbody id="customerTableBody"></tbody>
+            </table>
+          </div>
+          <div class="empty-state" id="customerEmpty" style="display:none;">
+            <span>🔎</span>
+            <p>No customers found for this type.</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Card: Update Customer Type -->
+      <div class="card">
+        <div class="card-header">
+          <div class="card-icon put-icon">PUT</div>
+          <div>
+            <h2 class="card-title">Update Customer Type</h2>
+            <code class="endpoint-badge">/customer/controller/updateCustomer</code>
+          </div>
+        </div>
+        <div class="card-body">
+          <div class="form-row">
+            <div class="form-group">
+              <label for="updCustId">Customer ID</label>
+              <input type="number" id="updCustId" placeholder="e.g. 1" min="1" />
+            </div>
+            <div class="form-group">
+              <label for="updCustName">Customer Name</label>
+              <input type="text" id="updCustName" placeholder="e.g. John Doe" />
+            </div>
+            <div class="form-group">
+              <label for="updCustEmail">Customer Email</label>
+              <input type="email" id="updCustEmail" placeholder="e.g. john@example.com" />
+            </div>
+            <div class="form-group">
+              <label for="updCustType">New Customer Type</label>
+              <select id="updCustType">
+                <option value="">— Select Type —</option>
+                <option value="Platinum">Platinum</option>
+                <option value="Gold">Gold</option>
+                <option value="Silver">Silver</option>
+              </select>
+            </div>
+          </div>
+          <div class="form-actions">
+            <button class="btn btn-success" id="btnUpdateCustomer">
+              <span>Update Customer</span>
+              <span class="btn-icon">✏️</span>
+            </button>
+          </div>
+          <div class="response-box" id="updateCustomerResponse" style="display:none;"></div>
+        </div>
+      </div>
+
+    </section>
+
+    <!-- ===================== ORDERS SECTION ===================== -->
+    <section class="section hidden" id="section-orders">
+
+      <!-- Card: Orders by Customer ID -->
+      <div class="card">
+        <div class="card-header">
+          <div class="card-icon get-icon">GET</div>
+          <div>
+            <h2 class="card-title">Orders by Customer ID</h2>
+            <code class="endpoint-badge">/order/controller/getOrderDetailsByCustomerId/{customerId}</code>
+          </div>
+        </div>
+        <div class="card-body">
+          <div class="form-row">
+            <div class="form-group">
+              <label for="orderCustomerId">Customer ID</label>
+              <input type="number" id="orderCustomerId" placeholder="e.g. 1" min="1" />
+            </div>
+            <div class="form-group btn-group-end">
+              <button class="btn btn-primary" id="btnGetOrdersByCustomer">
+                <span>Fetch Orders</span>
+                <span class="btn-icon">📋</span>
+              </button>
+            </div>
+          </div>
+          <div class="table-wrap" id="orderByCustomerTableWrap" style="display:none;">
+            <table id="orderByCustomerTable">
+              <thead>
+                <tr>
+                  <th>Order ID</th>
+                  <th>Customer ID</th>
+                  <th>Email</th>
+                  <th>Product</th>
+                  <th>Qty</th>
+                  <th>Date</th>
+                  <th>Billing (₹)</th>
+                </tr>
+              </thead>
+              <tbody id="orderByCustomerTableBody"></tbody>
+            </table>
+          </div>
+          <div class="empty-state" id="orderByCustomerEmpty" style="display:none;">
+            <span>📭</span>
+            <p>No orders found for this customer.</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Card: Orders by Customer Type & Bill Range -->
+      <div class="card">
+        <div class="card-header">
+          <div class="card-icon get-icon">GET</div>
+          <div>
+            <h2 class="card-title">Orders by Type &amp; Bill Range</h2>
+            <code
+              class="endpoint-badge">/order/controller/getOrderDetailsByCustomerTypeAndBillInRange/{type}--{min}--{max}</code>
+          </div>
+        </div>
+        <div class="card-body">
+          <div class="form-row">
+            <div class="form-group">
+              <label for="rangeCustomerType">Customer Type</label>
+              <select id="rangeCustomerType">
+                <option value="">— Select Type —</option>
+                <option value="Platinum">Platinum</option>
+                <option value="Gold">Gold</option>
+                <option value="Silver">Silver</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label for="rangeMin">Min Amount (₹)</label>
+              <input type="number" id="rangeMin" placeholder="e.g. 10" min="0" />
+            </div>
+            <div class="form-group">
+              <label for="rangeMax">Max Amount (₹)</label>
+              <input type="number" id="rangeMax" placeholder="e.g. 500" min="0" />
+            </div>
+            <div class="form-group btn-group-end">
+              <button class="btn btn-primary" id="btnGetOrdersByRange">
+                <span>Search</span>
+                <span class="btn-icon">🔍</span>
+              </button>
+            </div>
+          </div>
+          <div class="table-wrap" id="orderByRangeTableWrap" style="display:none;">
+            <table id="orderByRangeTable">
+              <thead>
+                <tr>
+                  <th>Order ID</th>
+                  <th>Customer ID</th>
+                  <th>Email</th>
+                  <th>Product</th>
+                  <th>Qty</th>
+                  <th>Date</th>
+                  <th>Billing (₹)</th>
+                </tr>
+              </thead>
+              <tbody id="orderByRangeTableBody"></tbody>
+            </table>
+          </div>
+          <div class="empty-state" id="orderByRangeEmpty" style="display:none;">
+            <span>📭</span>
+            <p>No orders found matching the criteria.</p>
+          </div>
+        </div>
+      </div>
+
+    </section>
+
+    <!-- ===================== PRODUCTS SECTION ===================== -->
+    <section class="section hidden" id="section-products">
+
+      <!-- Card: Update Product Stock -->
+      <div class="card">
+        <div class="card-header">
+          <div class="card-icon put-icon">PUT</div>
+          <div>
+            <h2 class="card-title">Update Product Stock</h2>
+            <code class="endpoint-badge">/product/controller/updateProductStock</code>
+          </div>
+        </div>
+        <div class="card-body">
+          <div class="form-row">
+            <div class="form-group">
+              <label for="prodId">Product ID</label>
+              <input type="number" id="prodId" placeholder="e.g. 1" min="1" />
+            </div>
+            <div class="form-group">
+              <label for="prodName">Product Name</label>
+              <input type="text" id="prodName" placeholder="e.g. Wireless Mouse" />
+            </div>
+            <div class="form-group">
+              <label for="prodPrice">Price (₹)</label>
+              <input type="number" id="prodPrice" placeholder="e.g. 24.99" min="0" step="0.01" />
+            </div>
+            <div class="form-group">
+              <label for="prodStock">New Stock Quantity</label>
+              <input type="number" id="prodStock" placeholder="e.g. 100" min="0" />
+            </div>
+          </div>
+          <div class="form-actions">
+            <button class="btn btn-success" id="btnUpdateStock">
+              <span>Update Stock</span>
+              <span class="btn-icon">📦</span>
+            </button>
+          </div>
+          <div class="response-box" id="updateStockResponse" style="display:none;"></div>
+        </div>
+      </div>
+
+      <!-- Quick Reference Card -->
+      <div class="card info-card">
+        <div class="card-header">
+          <div class="card-icon info-icon">ℹ️</div>
+          <div>
+            <h2 class="card-title">Sample Product Data</h2>
+            <p class="card-subtitle">Reference data loaded from database</p>
+          </div>
+        </div>
+        <div class="card-body">
+          <div class="chip-list">
+            <div class="chip">ID: 1 — Wireless Mouse — ₹24.99 — Stock: 40</div>
+            <div class="chip">ID: 2 — Bluetooth Keyboard — ₹79.99 — Stock: 4</div>
+            <div class="chip">ID: 3 — USB-C Hub — ₹15.50 — Stock: 20</div>
+            <div class="chip">ID: 4 — Laptop Stand — ₹45.00 — Stock: 15</div>
+            <div class="chip">ID: 5 — External Hard Drive — ₹60.75 — Stock: 5</div>
+          </div>
+        </div>
+      </div>
+
+    </section>
+
+  </main>
+
+  <script src="app.js"></script>
+</body>
+
+</html>

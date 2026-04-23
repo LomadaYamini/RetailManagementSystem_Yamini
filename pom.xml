@@ -9,7 +9,7 @@
 		<relativePath/> <!-- lookup parent from repository -->
 	</parent>
 	<groupId>com.accenture.lkm</groupId>
-	<artifactId>ReatailManagementSystem_Yamini</artifactId>
+	<artifactId>RetailManagementSystem_Yamini</artifactId>
 	<version>0.0.1-SNAPSHOT</version>
 	<name/>
 	<description/>
