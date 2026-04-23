@@ -1,4 +1,4 @@
-// ✅ AUTO-DETECT BASE URL (works locally + production)
+// ✅ AUTO-DETECT BASE URL (local + production)
 const BASE =
   window.location.hostname === 'localhost'
     ? 'http://localhost:8080'
@@ -27,24 +27,24 @@ function setLoading(btn, loading) {
   }
 }
 
-// ── Utility: Customer type badge ─────────────────────────────
+// ── Utility: Badge ───────────────────────────────────────────
 function typeBadge(type) {
   const cls = {
-    'Platinum': 'badge-platinum',
-    'Gold': 'badge-gold',
-    'Silver': 'badge-silver'
+    Platinum: 'badge-platinum',
+    Gold: 'badge-gold',
+    Silver: 'badge-silver'
   }[type] || '';
   return `<span class="badge ${cls}">${type || '—'}</span>`;
 }
 
-// ── Utility: Format currency ─────────────────────────────────
+// ── Utility: Currency ───────────────────────────────────────
 function fmt(val) {
   return val !== undefined && val !== null
     ? `₹${parseFloat(val).toFixed(2)}`
     : '—';
 }
 
-// ── Utility: show/hide response box ─────────────────────────
+// ── Utility: Response Box ───────────────────────────────────
 function showResponse(boxId, message, isError) {
   const box = document.getElementById(boxId);
   box.textContent = message;
@@ -52,7 +52,7 @@ function showResponse(boxId, message, isError) {
   box.style.display = 'block';
 }
 
-// ── Navigation ───────────────────────────────────────────────
+// ── Navigation ──────────────────────────────────────────────
 const sections = ['customers', 'orders', 'products'];
 const pageMeta = {
   customers: { title: 'Customer Management', sub: 'Search and manage customer records' },
@@ -67,7 +67,6 @@ function switchSection(name) {
   });
   document.getElementById('pageTitle').textContent = pageMeta[name].title;
   document.getElementById('pageSub').textContent = pageMeta[name].sub;
-  window.scrollTo({ top: 0, behavior: 'smooth' });
 }
 
 document.querySelectorAll('.nav-item').forEach(link => {
@@ -77,7 +76,7 @@ document.querySelectorAll('.nav-item').forEach(link => {
   });
 });
 
-// ── Server health check ──────────────────────────────────────
+// ── Server health check ─────────────────────────────────────
 async function checkServer() {
   const dot = document.getElementById('statusDot');
   const text = document.getElementById('statusText');
@@ -107,10 +106,14 @@ setInterval(checkServer, 30000);
 // CUSTOMERS
 // ============================================================
 
-// GET Customers
+// ✅ GET Customers by Type
 document.getElementById('btnGetCustomers').addEventListener('click', async () => {
   const btn = document.getElementById('btnGetCustomers');
   const type = document.getElementById('searchCustomerType').value.trim();
+
+  const tableWrap = document.getElementById('customerTableWrap');
+  const tbody = document.getElementById('customerTableBody');
+  const emptyState = document.getElementById('customerEmpty');
 
   if (!type) {
     showToast('Select customer type', 'error');
@@ -118,34 +121,66 @@ document.getElementById('btnGetCustomers').addEventListener('click', async () =>
   }
 
   setLoading(btn, true);
+  tableWrap.style.display = 'none';
+  emptyState.style.display = 'none';
 
   try {
     const res = await fetch(`${BASE}/customer/controller/getCustomersByType/${type}`);
+
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+
     const data = await res.json();
 
-    console.log(data);
-    showToast("Data fetched!", "success");
+    // ❌ No data
+    if (!data || data.length === 0) {
+      emptyState.style.display = 'block';
+      showToast("No customers found", "info");
+      return;
+    }
+
+    // ✅ Show table
+    tbody.innerHTML = data.map(c => `
+      <tr>
+        <td>${c.customerId}</td>
+        <td>${c.customerName || '—'}</td>
+        <td>${c.customerEmail || '—'}</td>
+        <td>${typeBadge(c.customerType)}</td>
+      </tr>
+    `).join('');
+
+    tableWrap.style.display = 'block';
+    showToast(`Found ${data.length} customers`, 'success');
 
   } catch (err) {
-    showToast("Error connecting server", "error");
+    showToast(`Error: ${err.message}`, 'error');
   } finally {
     setLoading(btn, false);
   }
 });
 
-// UPDATE Customer
+// ✅ UPDATE Customer
 document.getElementById('btnUpdateCustomer').addEventListener('click', async () => {
-  const id = document.getElementById('updCustId').value;
-  const name = document.getElementById('updCustName').value;
-  const email = document.getElementById('updCustEmail').value;
-  const type = document.getElementById('updCustType').value;
+  const btn = document.getElementById('btnUpdateCustomer');
+
+  const id = document.getElementById('updCustId').value.trim();
+  const name = document.getElementById('updCustName').value.trim();
+  const email = document.getElementById('updCustEmail').value.trim();
+  const type = document.getElementById('updCustType').value.trim();
+
+  if (!id || !name || !email || !type) {
+    showToast("Fill all fields", "error");
+    return;
+  }
+
+  setLoading(btn, true);
+  document.getElementById('updateCustomerResponse').style.display = 'none';
 
   try {
     const res = await fetch(`${BASE}/customer/controller/updateCustomer`, {
       method: 'PUT',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
-        customerId: id,
+        customerId: parseInt(id),
         customerName: name,
         customerEmail: email,
         customerType: type
@@ -153,9 +188,16 @@ document.getElementById('btnUpdateCustomer').addEventListener('click', async () 
     });
 
     const text = await res.text();
-    showToast(text, "success");
 
-  } catch {
+    if (!res.ok) throw new Error(text);
+
+    showResponse('updateCustomerResponse', text, false);
+    showToast("Customer updated!", "success");
+
+  } catch (err) {
+    showResponse('updateCustomerResponse', err.message, true);
     showToast("Update failed", "error");
+  } finally {
+    setLoading(btn, false);
   }
 });
