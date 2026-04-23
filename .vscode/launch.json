@@ -5,9 +5,18 @@
     "version": "0.2.0",
     "configurations": [
         {
-            "type": "jdk",
+            "name": "Attach to Chrome",
+            "port": 9222,
+            "request": "attach",
+            "type": "chrome",
+            "webRoot": "${workspaceFolder}/RetailManagementSystem_Yamini/src/main/resources/static"
+        },
+        {
+            "type": "java",
             "request": "launch",
-            "name": "Launch Java App"
+            "name": "Launch Java App",
+            "mainClass": "com.accenture.lkm.Application",
+            "projectName": "RetailManagementSystem_Yamini"
         }
     ]
 }
