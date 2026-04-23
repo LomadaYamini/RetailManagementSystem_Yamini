@@ -1,48 +1,30 @@
-package com.accenture.lkm.web.controller;
+// OLD FORMAT SUPPORT (--)
 
-import java.util.List;
+@GetMapping("/getOrderDetailsByCustomerTypeAndBillInRange/{customerType}--{minimum}--{maximum}")
+public ResponseEntity<List<OrderBean>> getOrdersOld(
+        @PathVariable String customerType,
+        @PathVariable double minimum,
+        @PathVariable double maximum) {
 
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
+    List<OrderBean> orders =
+            orderService.getOrderDetailsByCustomerTypeAndBillInRange(
+                    customerType, minimum, maximum);
 
-import com.accenture.lkm.bean.OrderBean;
-import com.accenture.lkm.service.OrderService;
+    return new ResponseEntity<>(orders, HttpStatus.OK);
+}
 
-@RestController
-@RequestMapping("/order/controller")
-public class OrderController {
 
-    @Autowired
-    private OrderService orderService;
+// NEW FORMAT SUPPORT (/)
 
-    // =====================================================
-    // ✅ 1. GET Orders by Customer ID
-    // =====================================================
-    @GetMapping("/getOrderDetailsByCustomerId/{customerId}")
-    public ResponseEntity<List<OrderBean>> getOrderDetailsByCustomerId(
-            @PathVariable int customerId) {
+@GetMapping("/getOrderDetailsByCustomerTypeAndBillInRange/{customerType}/{minimum}/{maximum}")
+public ResponseEntity<List<OrderBean>> getOrdersNew(
+        @PathVariable String customerType,
+        @PathVariable double minimum,
+        @PathVariable double maximum) {
 
-        List<OrderBean> orders =
-                orderService.getOrderDetailsByCustomerId(customerId);
+    List<OrderBean> orders =
+            orderService.getOrderDetailsByCustomerTypeAndBillInRange(
+                    customerType, minimum, maximum);
 
-        return new ResponseEntity<>(orders, HttpStatus.OK);
-    }
-
-    // =====================================================
-    // ✅ 2. FIXED RANGE API (NO --, NO ERROR)
-    // =====================================================
-    @GetMapping("/getOrderDetailsByCustomerTypeAndBillInRange/{customerType}/{minimum}/{maximum}")
-    public ResponseEntity<List<OrderBean>> getOrderDetailsByCustomerTypeAndBillInRange(
-            @PathVariable String customerType,
-            @PathVariable double minimum,
-            @PathVariable double maximum) {
-
-        List<OrderBean> orders =
-                orderService.getOrderDetailsByCustomerTypeAndBillInRange(
-                        customerType, minimum, maximum);
-
-        return new ResponseEntity<>(orders, HttpStatus.OK);
-    }
+    return new ResponseEntity<>(orders, HttpStatus.OK);
 }
