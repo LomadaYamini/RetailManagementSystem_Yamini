@@ -1,31 +1,28 @@
-// ✅ BACKEND URL (CHANGE ONLY IF YOUR URL IS DIFFERENT)
+// ✅ BACKEND URL
 const BASE = "https://retailmanagementspringbackend-production.up.railway.app";
 
 // =====================================================
 // SIMPLE TOAST
 // =====================================================
 function showToast(msg) {
-  alert(msg); // keep simple for now
+  alert(msg);
 }
 
 // =====================================================
-// NAVIGATION (FIX FOR YOUR MAIN ISSUE)
+// NAVIGATION (FIXED)
 // =====================================================
 document.querySelectorAll(".nav-item").forEach(item => {
   item.addEventListener("click", function (e) {
     e.preventDefault();
 
-    // hide all sections
     document.querySelectorAll(".section").forEach(sec => {
       sec.classList.add("hidden");
     });
 
-    // remove active
     document.querySelectorAll(".nav-item").forEach(n => {
       n.classList.remove("active");
     });
 
-    // show selected
     const section = this.dataset.section;
     document.getElementById("section-" + section).classList.remove("hidden");
 
@@ -34,7 +31,7 @@ document.querySelectorAll(".nav-item").forEach(item => {
 });
 
 // =====================================================
-// SERVER CHECK (SIMPLE)
+// SERVER STATUS
 // =====================================================
 async function checkServer() {
   try {
@@ -47,28 +44,74 @@ async function checkServer() {
 checkServer();
 
 // =====================================================
-// CUSTOMERS
+// CUSTOMERS - GET
 // =====================================================
 document.getElementById("btnGetCustomers").onclick = async () => {
   const type = document.getElementById("searchCustomerType").value;
 
-  if (!type) return showToast("Select type");
+  if (!type) return showToast("Select Customer Type");
 
-  const res = await fetch(`${BASE}/customer/controller/getCustomersByType/${type}`);
-  const data = await res.json();
+  try {
+    const res = await fetch(`${BASE}/customer/controller/getCustomersByType/${type}`);
+    const data = await res.json();
 
-  const tbody = document.getElementById("customerTableBody");
+    const tbody = document.getElementById("customerTableBody");
 
-  tbody.innerHTML = data.map(c => `
-    <tr>
-      <td>${c.customerId}</td>
-      <td>${c.customerName}</td>
-      <td>${c.customerEmail}</td>
-      <td>${c.customerType}</td>
-    </tr>
-  `).join("");
+    if (!data || data.length === 0) {
+      showToast("No customers found");
+      return;
+    }
 
-  document.getElementById("customerTableWrap").style.display = "block";
+    tbody.innerHTML = data.map(c => `
+      <tr>
+        <td>${c.customerId}</td>
+        <td>${c.customerName}</td>
+        <td>${c.customerEmail}</td>
+        <td>${c.customerType}</td>
+      </tr>
+    `).join("");
+
+    document.getElementById("customerTableWrap").style.display = "block";
+
+  } catch {
+    showToast("Customer fetch failed");
+  }
+};
+
+// =====================================================
+// CUSTOMER UPDATE
+// =====================================================
+document.getElementById("btnUpdateCustomer").onclick = async () => {
+  const id = document.getElementById("updCustId").value;
+  const name = document.getElementById("updCustName").value;
+  const email = document.getElementById("updCustEmail").value;
+  const type = document.getElementById("updCustType").value;
+
+  if (!id || !name || !email || !type)
+    return showToast("Fill all fields");
+
+  try {
+    const res = await fetch(`${BASE}/customer/controller/updateCustomer`, {
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        customerId: parseInt(id),
+        customerName: name,
+        customerEmail: email,
+        customerType: type
+      })
+    });
+
+    const text = await res.text();
+
+    document.getElementById("updateCustomerResponse").innerText = text;
+    document.getElementById("updateCustomerResponse").style.display = "block";
+
+    showToast("Customer Updated Successfully");
+
+  } catch {
+    showToast("Customer update failed");
+  }
 };
 
 // =====================================================
@@ -79,24 +122,34 @@ document.getElementById("btnGetOrdersByCustomer").onclick = async () => {
 
   if (!id) return showToast("Enter Customer ID");
 
-  const res = await fetch(`${BASE}/order/controller/getOrderDetailsByCustomerId/${id}`);
-  const data = await res.json();
+  try {
+    const res = await fetch(`${BASE}/order/controller/getOrderDetailsByCustomerId/${id}`);
+    const data = await res.json();
 
-  const tbody = document.getElementById("orderByCustomerTableBody");
+    const tbody = document.getElementById("orderByCustomerTableBody");
 
-  tbody.innerHTML = data.map(o => `
-    <tr>
-      <td>${o.orderId}</td>
-      <td>${o.customerId}</td>
-      <td>${o.customerEmail}</td>
-      <td>${o.productName}</td>
-      <td>${o.quantity}</td>
-      <td>${o.orderDate}</td>
-      <td>${o.billingAmount}</td>
-    </tr>
-  `).join("");
+    if (!data || data.length === 0) {
+      showToast("No orders found");
+      return;
+    }
 
-  document.getElementById("orderByCustomerTableWrap").style.display = "block";
+    tbody.innerHTML = data.map(o => `
+      <tr>
+        <td>${o.orderId}</td>
+        <td>${o.customerId}</td>
+        <td>${o.customerEmail}</td>
+        <td>${o.productName}</td>
+        <td>${o.quantity}</td>
+        <td>${o.orderDate}</td>
+        <td>${o.billingAmount}</td>
+      </tr>
+    `).join("");
+
+    document.getElementById("orderByCustomerTableWrap").style.display = "block";
+
+  } catch {
+    showToast("Orders fetch failed");
+  }
 };
 
 // =====================================================
@@ -107,26 +160,37 @@ document.getElementById("btnGetOrdersByRange").onclick = async () => {
   const min = document.getElementById("rangeMin").value;
   const max = document.getElementById("rangeMax").value;
 
-  if (!type || !min || !max) return showToast("Fill all fields");
+  if (!type || !min || !max)
+    return showToast("Fill all fields");
 
-  const res = await fetch(`${BASE}/order/controller/getOrderDetailsByCustomerTypeAndBillInRange/${type}--${min}--${max}`);
-  const data = await res.json();
+  try {
+    const res = await fetch(`${BASE}/order/controller/getOrderDetailsByCustomerTypeAndBillInRange/${type}--${min}--${max}`);
+    const data = await res.json();
 
-  const tbody = document.getElementById("orderByRangeTableBody");
+    const tbody = document.getElementById("orderByRangeTableBody");
 
-  tbody.innerHTML = data.map(o => `
-    <tr>
-      <td>${o.orderId}</td>
-      <td>${o.customerId}</td>
-      <td>${o.customerEmail}</td>
-      <td>${o.productName}</td>
-      <td>${o.quantity}</td>
-      <td>${o.orderDate}</td>
-      <td>${o.billingAmount}</td>
-    </tr>
-  `).join("");
+    if (!data || data.length === 0) {
+      showToast("No orders found");
+      return;
+    }
 
-  document.getElementById("orderByRangeTableWrap").style.display = "block";
+    tbody.innerHTML = data.map(o => `
+      <tr>
+        <td>${o.orderId}</td>
+        <td>${o.customerId}</td>
+        <td>${o.customerEmail}</td>
+        <td>${o.productName}</td>
+        <td>${o.quantity}</td>
+        <td>${o.orderDate}</td>
+        <td>${o.billingAmount}</td>
+      </tr>
+    `).join("");
+
+    document.getElementById("orderByRangeTableWrap").style.display = "block";
+
+  } catch {
+    showToast("Range fetch failed");
+  }
 };
 
 // =====================================================
@@ -139,21 +203,28 @@ document.getElementById("btnUpdateStock").onclick = async () => {
   const stock = document.getElementById("prodStock").value;
 
   if (!id || !name || !price || !stock)
-    return showToast("Fill all fields");
+    return showToast("Fill all product fields");
 
-  const res = await fetch(`${BASE}/product/controller/updateProductStock`, {
-    method: "PUT",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({
-      productId: id,
-      productName: name,
-      price: price,
-      stock: stock
-    })
-  });
+  try {
+    const res = await fetch(`${BASE}/product/controller/updateProductStock`, {
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        productId: parseInt(id),
+        productName: name,
+        price: parseFloat(price),
+        stock: parseInt(stock)
+      })
+    });
 
-  const text = await res.text();
+    const text = await res.text();
 
-  document.getElementById("updateStockResponse").innerText = text;
-  document.getElementById("updateStockResponse").style.display = "block";
+    document.getElementById("updateStockResponse").innerText = text;
+    document.getElementById("updateStockResponse").style.display = "block";
+
+    showToast("Product Updated Successfully");
+
+  } catch {
+    showToast("Product update failed");
+  }
 };
