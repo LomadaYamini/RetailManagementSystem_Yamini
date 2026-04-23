@@ -6,9 +6,9 @@ spring:
     init:
       mode: always
   datasource:
-    url: jdbc:mysql://${DB_HOST:localhost}:3306/customerproductmgmtdb
-    username: root
-    password: root
+    url: jdbc:mysql://${SPRING_DATASOURCE_HOST}:${SPRING_DATASOURCE_PORT}/${SPRING_DATASOURCE_DATABASE}
+    username: ${SPRING_DATASOURCE_USERNAME}
+    password: ${SPRING_DATASOURCE_PASSWORD}
     driver-class-name: com.mysql.cj.jdbc.Driver
   jpa:
     defer-datasource-initialization: true
