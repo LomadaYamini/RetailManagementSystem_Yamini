@@ -1,15 +1,17 @@
+// =====================================================
 // ✅ BACKEND URL
+// =====================================================
 const BASE = "https://retailmanagementspringbackend-production.up.railway.app";
 
 // =====================================================
-// SIMPLE ALERT (stable, no UI bugs)
+// ✅ SIMPLE ALERT
 // =====================================================
 function show(msg) {
   alert(msg);
 }
 
 // =====================================================
-// NAVIGATION (WORKING)
+// ✅ NAVIGATION (FIXED)
 // =====================================================
 document.querySelectorAll(".nav-item").forEach(item => {
   item.onclick = function (e) {
@@ -24,7 +26,32 @@ document.querySelectorAll(".nav-item").forEach(item => {
 });
 
 // =====================================================
-// CUSTOMERS - GET BY TYPE
+// ✅ SERVER STATUS (FIXED - NO MORE "CONNECTING")
+// =====================================================
+async function checkServer() {
+  const text = document.getElementById("statusText");
+  const dot = document.getElementById("statusDot");
+
+  try {
+    const res = await fetch(`${BASE}/customer/controller/getCustomersByType/Gold`);
+
+    if (res.ok || res.status === 404) {
+      text.innerText = "Server Online";
+      dot.style.background = "green";
+    } else {
+      throw new Error();
+    }
+  } catch {
+    text.innerText = "Server Offline";
+    dot.style.background = "red";
+  }
+}
+
+checkServer();
+setInterval(checkServer, 10000);
+
+// =====================================================
+// ✅ CUSTOMERS - GET BY TYPE
 // =====================================================
 document.getElementById("btnGetCustomers").onclick = async () => {
   const type = document.getElementById("searchCustomerType").value;
@@ -67,7 +94,7 @@ document.getElementById("btnGetCustomers").onclick = async () => {
 };
 
 // =====================================================
-// UPDATE CUSTOMER
+// ✅ UPDATE CUSTOMER
 // =====================================================
 document.getElementById("btnUpdateCustomer").onclick = async () => {
   const id = document.getElementById("updCustId").value;
@@ -103,7 +130,7 @@ document.getElementById("btnUpdateCustomer").onclick = async () => {
 };
 
 // =====================================================
-// ORDERS - BY CUSTOMER ID
+// ✅ ORDERS - BY CUSTOMER ID
 // =====================================================
 document.getElementById("btnGetOrdersByCustomer").onclick = async () => {
   const id = document.getElementById("orderCustomerId").value;
@@ -149,7 +176,7 @@ document.getElementById("btnGetOrdersByCustomer").onclick = async () => {
 };
 
 // =====================================================
-// ORDERS - TYPE & BILL RANGE
+// ✅ ORDERS - TYPE & RANGE
 // =====================================================
 document.getElementById("btnGetOrdersByRange").onclick = async () => {
   const type = document.getElementById("rangeCustomerType").value;
@@ -196,7 +223,7 @@ document.getElementById("btnGetOrdersByRange").onclick = async () => {
 };
 
 // =====================================================
-// PRODUCT - UPDATE STOCK
+// ✅ PRODUCT UPDATE
 // =====================================================
 document.getElementById("btnUpdateStock").onclick = async () => {
   const id = document.getElementById("prodId").value;
@@ -205,7 +232,7 @@ document.getElementById("btnUpdateStock").onclick = async () => {
   const stock = document.getElementById("prodStock").value;
 
   if (!id || !name || !price || !stock)
-    return show("Fill all product fields");
+    return show("Fill all fields");
 
   try {
     const res = await fetch(`${BASE}/product/controller/updateProductStock`, {
