@@ -32,7 +32,7 @@ public class OrderController {
         return new ResponseEntity<>(orders, HttpStatus.OK);
     }
 
-    @GetMapping("/getOrderDetailsByCustomerTypeAndBillInRange/{customerType}--{minimum}--{maximum}")
+@GetMapping("/getOrderDetailsByCustomerTypeAndBillInRange/{customerType}--{minimum}--{maximum}")
     public ResponseEntity<List<OrderBean>> getOrderDetailsByCustomerTypeAndBillInRange(
             @PathVariable String customerType,
             @PathVariable double minimum,
