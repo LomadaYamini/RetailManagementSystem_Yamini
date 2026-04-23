@@ -1,3 +1,13 @@
+package com.accenture.lkm.web.controller;
+
+import java.util.List;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.*;
+
+import com.accenture.lkm.bean.OrderBean;
+import com.accenture.lkm.service.OrderService;
+
 @RestController
 @RequestMapping("/order/controller")
 public class OrderController {
@@ -5,27 +15,23 @@ public class OrderController {
     @Autowired
     private OrderService orderService;
 
-    // ✅ Orders by Customer ID
+    // ==========================================
+    // ✅ 1. Orders by Customer ID
+    // ==========================================
     @GetMapping("/getOrderDetailsByCustomerId/{customerId}")
-    public ResponseEntity<List<OrderBean>> getOrderDetailsByCustomerId(
-            @PathVariable int customerId) {
-
-        return new ResponseEntity<>(
-                orderService.getOrderDetailsByCustomerId(customerId),
-                HttpStatus.OK
-        );
+    public List<OrderBean> getOrderDetailsByCustomerId(@PathVariable int customerId) {
+        return orderService.getOrderDetailsByCustomerId(customerId);
     }
 
-    // ✅ FIXED RANGE API (FINAL)
+    // ==========================================
+    // ✅ 2. Orders by Type + Range (FINAL FIX)
+    // ==========================================
     @GetMapping("/getOrderDetailsByCustomerTypeAndBillInRange/{type}/{min}/{max}")
-    public ResponseEntity<List<OrderBean>> getOrdersByRange(
-            @PathVariable("type") String type,
-            @PathVariable("min") double min,
-            @PathVariable("max") double max) {
+    public List<OrderBean> getOrdersByRange(
+            @PathVariable String type,
+            @PathVariable double min,
+            @PathVariable double max) {
 
-        return new ResponseEntity<>(
-                orderService.getOrderDetailsByCustomerTypeAndBillInRange(type, min, max),
-                HttpStatus.OK
-        );
+        return orderService.getOrderDetailsByCustomerTypeAndBillInRange(type, min, max);
     }
 }
