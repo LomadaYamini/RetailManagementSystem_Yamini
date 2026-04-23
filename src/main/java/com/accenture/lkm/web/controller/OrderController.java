@@ -1,48 +1,39 @@
-package com.accenture.lkm.web.controller;
+btnGetOrdersByRange.onclick = async () => {
+  const type = rangeCustomerType.value;
+  const min = rangeMin.value;
+  const max = rangeMax.value;
 
-import java.util.List;
+  if (!type || !min || !max) {
+    alert("Fill all fields");
+    return;
+  }
 
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
+  try {
+    const url = `${BASE}/order/controller/getOrderDetailsByCustomerTypeAndBillInRange/${type}/${min}/${max}`;
 
-import com.accenture.lkm.bean.OrderBean;
-import com.accenture.lkm.service.OrderService;
+    console.log("Calling:", url); // DEBUG
 
-@RestController
-@RequestMapping("/order/controller")
-public class OrderController {
+    const res = await fetch(url);
 
-    @Autowired
-    private OrderService orderService;
+    if (!res.ok) throw new Error(await res.text());
 
-    // =====================================================
-    // ✅ 1. GET Orders by Customer ID
-    // =====================================================
-    @GetMapping("/getOrderDetailsByCustomerId/{customerId}")
-    public ResponseEntity<List<OrderBean>> getOrderDetailsByCustomerId(
-            @PathVariable int customerId) {
+    const data = await res.json();
 
-        List<OrderBean> orders =
-                orderService.getOrderDetailsByCustomerId(customerId);
+    orderByRangeTableBody.innerHTML = data.map(o => `
+      <tr>
+        <td>${o.orderId}</td>
+        <td>${o.customerId}</td>
+        <td>${o.customerEmail}</td>
+        <td>${o.productName}</td>
+        <td>${o.quantity}</td>
+        <td>${o.orderDate}</td>
+        <td>${o.billingAmount}</td>
+      </tr>
+    `).join("");
 
-        return new ResponseEntity<>(orders, HttpStatus.OK);
-    }
+    orderByRangeTableWrap.style.display = "block";
 
-    // =====================================================
-    // ✅ 2. FIXED RANGE API (NO --, NO ERROR)
-    // =====================================================
-    @GetMapping("/getOrderDetailsByCustomerTypeAndBillInRange/{customerType}/{minimum}/{maximum}")
-    public ResponseEntity<List<OrderBean>> getOrderDetailsByCustomerTypeAndBillInRange(
-            @PathVariable String customerType,
-            @PathVariable double minimum,
-            @PathVariable double maximum) {
-
-        List<OrderBean> orders =
-                orderService.getOrderDetailsByCustomerTypeAndBillInRange(
-                        customerType, minimum, maximum);
-
-        return new ResponseEntity<>(orders, HttpStatus.OK);
-    }
-}
+  } catch (err) {
+    alert("Range fetch failed: " + err.message);
+  }
+};
