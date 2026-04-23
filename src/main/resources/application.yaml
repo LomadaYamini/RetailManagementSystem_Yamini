@@ -1,15 +1,17 @@
 server:
-  port: 8080
+  port: ${PORT:8080}
 
 spring:
   sql:
     init:
       mode: always
+
   datasource:
-    url: jdbc:mysql://${DB_HOST:localhost}:3306/customerproductmgmtdb
-    username: root
-    password: root
+    url: jdbc:mysql://${DB_HOST:localhost}:${DB_PORT:3306}/${DB_NAME:customerproductmgmtdb}
+    username: ${DB_USER:root}
+    password: ${DB_PASSWORD:root}
     driver-class-name: com.mysql.cj.jdbc.Driver
+
   jpa:
     defer-datasource-initialization: true
     hibernate:
